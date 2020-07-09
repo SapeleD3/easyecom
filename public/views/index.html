@@ -4,18 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Google Calender APi</title>
-    <link rel="stylesheet" href="./index.css" />
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
       integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="/static/css/index.css" />
   </head>
   <body>
+    <nav class="navbar navbar-dark bg-dark navi">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="http://localhost:7000/"
+          >Calender API <span class="sr-only">(current)</span></a
+        >
+        <a class="nav-item nav-link" href="http://localhost:7000/pay/"
+          >PaySheet</a
+        >
+      </div>
+    </nav>
     <div class="container">
       <div class="form-container">
-        <form action="http://localhost:7000/" method="POST" class="form">
+        <form
+          action="http://localhost:7000/calendar/"
+          method="POST"
+          class="form"
+        >
           <a
             class="button btn btn-outline-danger"
             target="blank"
@@ -33,7 +47,11 @@
           <input type="submit" value="My Events" class="button btn btn-info" />
         </form>
         <hr />
-        <form action="http://localhost:7000/events" method="POST" class="form">
+        <form
+          action="http://localhost:7000/calendar/events"
+          method="POST"
+          class="form"
+        >
           <label class="form-text" for="attendee email">Attendee Email</label>
           <input
             type="text"

@@ -1,11 +1,28 @@
 import * as fs from 'fs';
 import {google} from 'googleapis';
-import {TOKEN_PATH, CREDENTIAL_PATH} from '../constants';
+import {
+  TOKEN_PATH,
+  CREDENTIAL_PATH,
+  logMessage,
+  PRIMARY,
+  START_TIME,
+} from '../constants';
 import {log} from '../util/logs';
 
+const {
+  TOKEN_LOG,
+  FILE_GEN_ERROR,
+  LIST_EVENT_ERROR1,
+  TOKEN_ERROR1,
+  UPCOMING_EVENT,
+  FREE_BUSY_ERROR1,
+  FREE_BUSY_ERROR2,
+  SUCCESSFUL_EVENT,
+  BUSY_ERROR,
+} = logMessage;
 export const calender = (req, res, tkn, eventArray) => {
   fs.readFile(CREDENTIAL_PATH, (err, content: any) => {
-    if (err) return log(`Error loading client secret file: ${err}`);
+    if (err) return log(FILE_GEN_ERROR(err));
     authorize(JSON.parse(content), listEvents);
   });
 
@@ -39,12 +56,12 @@ export const calender = (req, res, tkn, eventArray) => {
    */
   function getAccessToken(oAuth2Client, callback) {
     oAuth2Client.getToken(tkn, (err, token) => {
-      if (err) return log(`Error retrieving access token, ${err}`);
+      if (err) return log(TOKEN_ERROR1(err));
       oAuth2Client.setCredentials(token);
       // Store the token to disk for later program executions
       fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
         if (err) return log(err);
-        log(`Token stored to: ${TOKEN_PATH}`);
+        log(TOKEN_LOG());
       });
       callback(oAuth2Client);
     });
@@ -59,24 +76,23 @@ export const calender = (req, res, tkn, eventArray) => {
       const calendar = await google.calendar({version: 'v3', auth});
       calendar.events.list(
         {
-          calendarId: 'primary',
+          calendarId: PRIMARY,
           timeMin: new Date().toISOString(),
           maxResults: 10,
           singleEvents: true,
-          orderBy: 'startTime',
+          orderBy: START_TIME,
         },
         (err, res) => {
-          if (err) return console.log(`The API returned an error: ${err}`);
+          if (err) LIST_EVENT_ERROR1(err);
           const events = res.data.items;
           if (events.length) {
-            log('Upcoming 10 events:');
             events.map((event, i) => {
               const start = event.start.dateTime || event.start.date;
               log(`${start} - ${event.summary}`);
               eventArray.push(event);
             });
           } else {
-            log('No upcoming events found.');
+            log(UPCOMING_EVENT);
           }
         },
       );
@@ -119,26 +135,26 @@ export const createEvent = async (to, summary, description) => {
       resource: {
         timeMin: eventStartTime,
         timeMax: eventEndTime,
-        items: [{id: 'primary'}],
+        items: [{id: PRIMARY}],
       },
     },
     (err, res) => {
-      if (err) return log(`Free Busy Query err: ${err}`);
+      if (err) return log(FREE_BUSY_ERROR1(err));
 
       const eventArr = res.data.calendars.primary.busy;
       if (eventArr.length === 0) {
         calender.events.insert(
           {
-            calendarId: 'primary',
+            calendarId: PRIMARY,
             resource: event,
           },
           (err) => {
-            if (err) return log(`Error creating calender Event: ${err}`);
-            return log(`Event created successfully`);
+            if (err) return log(FREE_BUSY_ERROR2(err));
+            return log(SUCCESSFUL_EVENT);
           },
         );
       }
     },
   );
-  return log(`Sorry my schedule is busy at the moment`);
+  return log(BUSY_ERROR);
 };

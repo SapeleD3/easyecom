@@ -2,6 +2,7 @@
 # secrets
 /credentials.json
 /token.json
+/newFile.csv
 
 # Logs
 logs
@@ -44,6 +45,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+uploads/
 jspm_packages/
 dist/
 
